@@ -3,6 +3,22 @@ export interface SkillCategory {
   skills: string[];
 }
 
+export type CompanySize = "Startup" | "Mid-size" | "Enterprise";
+
+export interface CompanyIntel {
+  companyName: string;
+  industry: string;
+  size: CompanySize;
+  hiringFocus: string;
+  rounds: RoundMapping[];
+}
+
+export interface RoundMapping {
+  round: string;
+  title: string;
+  why: string;
+}
+
 export interface AnalysisEntry {
   id: string;
   createdAt: string;
@@ -15,6 +31,7 @@ export interface AnalysisEntry {
   questions: string[];
   readinessScore: number;
   skillConfidenceMap?: Record<string, "know" | "practice">;
+  companyIntel?: CompanyIntel;
 }
 
 export interface DayPlan {
@@ -361,12 +378,142 @@ export function generateQuestions(skills: SkillCategory[]): string[] {
   return questions;
 }
 
+const ENTERPRISE_COMPANIES = [
+  "amazon", "google", "microsoft", "meta", "apple", "infosys", "tcs",
+  "wipro", "cognizant", "accenture", "deloitte", "ibm", "oracle", "sap",
+  "salesforce", "adobe", "uber", "flipkart", "paytm", "walmart", "jpmorgan",
+  "goldman sachs", "morgan stanley", "cisco", "intel", "samsung", "hcl",
+  "capgemini", "ey", "kpmg", "pwc", "tech mahindra", "mindtree", "mphasis",
+  "netflix", "spotify", "stripe", "airbnb", "twitter", "linkedin",
+];
+
+const MIDSIZE_COMPANIES = [
+  "razorpay", "cred", "meesho", "zerodha", "phonepe", "swiggy", "zomato",
+  "freshworks", "zoho", "postman", "browserstack", "hasura", "unacademy",
+  "byjus", "groww", "slice", "jupiter", "smallcase", "lenskart",
+];
+
+function inferCompanySize(company: string): CompanySize {
+  const lower = company.toLowerCase().trim();
+  if (ENTERPRISE_COMPANIES.some((c) => lower.includes(c))) return "Enterprise";
+  if (MIDSIZE_COMPANIES.some((c) => lower.includes(c))) return "Mid-size";
+  return "Startup";
+}
+
+function inferIndustry(company: string, jdText: string): string {
+  const text = `${company} ${jdText}`.toLowerCase();
+  if (/fintech|banking|payment|trading|finance/.test(text)) return "Financial Services";
+  if (/health|medical|pharma|biotech/.test(text)) return "Healthcare & Life Sciences";
+  if (/ecommerce|e-commerce|retail|shopping/.test(text)) return "E-Commerce & Retail";
+  if (/edtech|education|learning|academy/.test(text)) return "Education Technology";
+  if (/gaming|game|entertainment/.test(text)) return "Gaming & Entertainment";
+  if (/logistics|supply chain|delivery|shipping/.test(text)) return "Logistics & Supply Chain";
+  return "Technology Services";
+}
+
+export function generateCompanyIntel(
+  company: string,
+  jdText: string,
+  skills: SkillCategory[]
+): CompanyIntel | undefined {
+  if (!company.trim()) return undefined;
+
+  const size = inferCompanySize(company);
+  const industry = inferIndustry(company, jdText);
+  const hasDSA = hasCategory(skills, "Core CS") || hasSkill(skills, "dsa");
+  const hasWeb = hasCategory(skills, "Web");
+  const hasCloud = hasCategory(skills, "Cloud/DevOps");
+
+  let hiringFocus: string;
+  if (size === "Enterprise") {
+    hiringFocus =
+      "Enterprise companies typically emphasize structured DSA rounds, core CS fundamentals, and behavioral interviews. Expect multiple rounds with a focus on problem-solving speed and clarity.";
+  } else if (size === "Mid-size") {
+    hiringFocus =
+      "Mid-size companies balance DSA proficiency with practical skills. Expect hands-on coding rounds alongside system design discussions and cultural fit assessments.";
+  } else {
+    hiringFocus =
+      "Startups prioritize practical problem-solving, stack depth, and ownership mindset. Expect take-home assignments or live coding with a focus on building real features fast.";
+  }
+
+  let rounds: RoundMapping[];
+
+  if (size === "Enterprise") {
+    rounds = [
+      {
+        round: "Round 1",
+        title: "Online Test (DSA + Aptitude)",
+        why: "Enterprise firms use this to screen thousands of candidates efficiently. Strong DSA and aptitude scores are table stakes.",
+      },
+      {
+        round: "Round 2",
+        title: hasDSA ? "Technical — DSA & Core CS" : "Technical — Problem Solving",
+        why: "This is the make-or-break round. They test algorithmic thinking, data structures, and core CS depth under time pressure.",
+      },
+      {
+        round: "Round 3",
+        title: hasWeb ? "Tech + Projects (Stack Deep-Dive)" : "Tech + Projects",
+        why: "Here they validate your real-world skills. Expect questions about your projects, architecture decisions, and debugging experiences.",
+      },
+      {
+        round: "Round 4",
+        title: "HR / Managerial",
+        why: "Cultural fit and communication matter. They assess your growth mindset, teamwork, and alignment with company values.",
+      },
+    ];
+  } else if (size === "Mid-size") {
+    rounds = [
+      {
+        round: "Round 1",
+        title: hasDSA ? "Coding Round (DSA + Logic)" : "Practical Coding Challenge",
+        why: "Mid-size firms test a mix of algorithmic skills and practical problem-solving to find well-rounded engineers.",
+      },
+      {
+        round: "Round 2",
+        title: hasCloud ? "System Design & Infrastructure" : "System Discussion",
+        why: "They want to see how you think about scale, trade-offs, and real-world system architecture.",
+      },
+      {
+        round: "Round 3",
+        title: hasWeb ? "Full-Stack Technical Discussion" : "Technical Deep-Dive",
+        why: "This round goes deep into your stack expertise, past projects, and ability to learn and adapt quickly.",
+      },
+      {
+        round: "Round 4",
+        title: "Culture Fit & HR",
+        why: "Team culture is critical at mid-size companies. They assess if you'll thrive in their environment.",
+      },
+    ];
+  } else {
+    rounds = [
+      {
+        round: "Round 1",
+        title: hasWeb ? "Practical Coding (Build a Feature)" : "Take-Home / Live Coding",
+        why: "Startups care about shipping. They test your ability to write clean, working code for a real-world problem.",
+      },
+      {
+        round: "Round 2",
+        title: "System Discussion & Architecture",
+        why: "At a startup you'll make architecture decisions early. They want to know you can design scalable systems.",
+      },
+      {
+        round: "Round 3",
+        title: "Culture Fit & Founder Chat",
+        why: "Startups are small teams — personality, ownership, and hustle matter as much as technical skill.",
+      },
+    ];
+  }
+
+  return { companyName: company, industry, size, hiringFocus, rounds };
+}
+
 export function runAnalysis(company: string, role: string, jdText: string): AnalysisEntry {
   const extractedSkills = extractSkills(jdText);
   const readinessScore = calcReadinessScore(company, role, jdText, extractedSkills);
   const checklist = generateChecklist(extractedSkills);
   const plan = generatePlan(extractedSkills);
   const questions = generateQuestions(extractedSkills);
+  const companyIntel = generateCompanyIntel(company, jdText, extractedSkills);
 
   return {
     id: crypto.randomUUID(),
@@ -379,5 +526,6 @@ export function runAnalysis(company: string, role: string, jdText: string): Anal
     checklist,
     questions,
     readinessScore,
+    companyIntel,
   };
 }

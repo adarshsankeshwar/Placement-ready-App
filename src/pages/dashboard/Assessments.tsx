@@ -19,6 +19,8 @@ import ReadinessRing from "@/components/assessments/ReadinessRing";
 import SkillTags from "@/components/assessments/SkillTags";
 import ExportButtons from "@/components/assessments/ExportButtons";
 import ActionNextBox from "@/components/assessments/ActionNextBox";
+import CompanyIntelCard from "@/components/assessments/CompanyIntelCard";
+import RoundTimeline from "@/components/assessments/RoundTimeline";
 
 const Assessments = () => {
   const [searchParams] = useSearchParams();
@@ -110,6 +112,14 @@ const Assessments = () => {
           onToggle={handleToggle}
         />
       </div>
+
+      {/* Company Intel + Round Mapping */}
+      {entry.companyIntel && (
+        <div className="grid gap-6 md:grid-cols-2">
+          <CompanyIntelCard intel={entry.companyIntel} />
+          <RoundTimeline rounds={entry.companyIntel.rounds} />
+        </div>
+      )}
 
       {/* Export */}
       <ExportButtons entry={entry} />
