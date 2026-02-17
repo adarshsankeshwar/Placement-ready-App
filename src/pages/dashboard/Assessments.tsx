@@ -1,24 +1,24 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
-import type { AnalysisEntry } from "@/lib/analysis";
-import { getEntryById } from "@/lib/history";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import type { AnalysisEntry } from "@/lib/analysis";
+import { getEntryById, updateEntry } from "@/lib/history";
 import {
   Target,
   ListChecks,
   CalendarDays,
   HelpCircle,
   ArrowLeft,
-  Tag,
 } from "lucide-react";
 
-const RADIUS = 60;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+import ReadinessRing from "@/components/assessments/ReadinessRing";
+import SkillTags from "@/components/assessments/SkillTags";
+import ExportButtons from "@/components/assessments/ExportButtons";
+import ActionNextBox from "@/components/assessments/ActionNextBox";
 
 const Assessments = () => {
   const [searchParams] = useSearchParams();
@@ -32,6 +32,44 @@ const Assessments = () => {
       if (found) setEntry(found);
     }
   }, [searchParams]);
+
+  const confidenceMap = useMemo(() => entry?.skillConfidenceMap || {}, [entry]);
+
+  const allSkills = useMemo(() => {
+    if (!entry) return [];
+    return entry.extractedSkills.flatMap((c) => c.skills);
+  }, [entry]);
+
+  const liveScore = useMemo(() => {
+    if (!entry) return 0;
+    let score = entry.readinessScore;
+    for (const skill of allSkills) {
+      const status = confidenceMap[skill];
+      if (status === "know") score += 2;
+      else score -= 2;
+    }
+    return Math.max(0, Math.min(100, score));
+  }, [entry, confidenceMap, allSkills]);
+
+  const weakSkills = useMemo(
+    () => allSkills.filter((s) => (confidenceMap[s] || "practice") === "practice"),
+    [allSkills, confidenceMap]
+  );
+
+  const handleToggle = useCallback(
+    (skill: string) => {
+      if (!entry) return;
+      const current = confidenceMap[skill] || "practice";
+      const next = current === "know" ? "practice" : "know";
+      const updated: AnalysisEntry = {
+        ...entry,
+        skillConfidenceMap: { ...confidenceMap, [skill]: next },
+      };
+      setEntry(updated);
+      updateEntry(updated);
+    },
+    [entry, confidenceMap]
+  );
 
   if (!entry) {
     return (
@@ -47,8 +85,6 @@ const Assessments = () => {
       </div>
     );
   }
-
-  const offset = CIRCUMFERENCE - (entry.readinessScore / 100) * CIRCUMFERENCE;
 
   return (
     <div className="space-y-6 max-w-4xl">
@@ -67,57 +103,18 @@ const Assessments = () => {
 
       {/* Score + Skills Row */}
       <div className="grid gap-6 md:grid-cols-2">
-        {/* Readiness Score */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <Target className="h-4 w-4 text-primary" /> Readiness Score
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center pb-8">
-            <div className="relative">
-              <svg width="150" height="150" viewBox="0 0 150 150" className="-rotate-90">
-                <circle cx="75" cy="75" r={RADIUS} fill="none" stroke="hsl(var(--muted))" strokeWidth="10" />
-                <circle
-                  cx="75" cy="75" r={RADIUS} fill="none"
-                  stroke="hsl(var(--primary))" strokeWidth="10" strokeLinecap="round"
-                  strokeDasharray={CIRCUMFERENCE} strokeDashoffset={offset}
-                  className="transition-all duration-1000 ease-out"
-                />
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-3xl font-bold text-foreground">{entry.readinessScore}</span>
-                <span className="text-xs text-muted-foreground">/ 100</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Extracted Skills */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <Tag className="h-4 w-4 text-primary" /> Key Skills Extracted
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {entry.extractedSkills.map((cat) => (
-              <div key={cat.name}>
-                <p className="text-xs font-medium text-muted-foreground mb-1">{cat.name}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {cat.skills.map((s) => (
-                    <Badge key={s} variant="secondary" className="text-xs">
-                      {s}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+        <ReadinessRing score={liveScore} />
+        <SkillTags
+          extractedSkills={entry.extractedSkills}
+          confidenceMap={confidenceMap}
+          onToggle={handleToggle}
+        />
       </div>
 
-      {/* Tabs for Checklist, Plan, Questions */}
+      {/* Export */}
+      <ExportButtons entry={entry} />
+
+      {/* Tabs */}
       <Tabs defaultValue="checklist">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="checklist" className="gap-1.5 text-xs sm:text-sm">
@@ -131,7 +128,6 @@ const Assessments = () => {
           </TabsTrigger>
         </TabsList>
 
-        {/* Checklist Tab */}
         <TabsContent value="checklist" className="space-y-4 mt-4">
           {entry.checklist.map((round) => (
             <Card key={round.round}>
@@ -155,7 +151,6 @@ const Assessments = () => {
           ))}
         </TabsContent>
 
-        {/* 7-Day Plan Tab */}
         <TabsContent value="plan" className="space-y-4 mt-4">
           {entry.plan.map((day, i) => (
             <Card key={day.day}>
@@ -165,9 +160,7 @@ const Assessments = () => {
                     <span className="text-primary font-bold mr-2">{day.day}</span>
                     {day.focus}
                   </span>
-                  <span className="text-xs text-muted-foreground font-normal">
-                    {i + 1}/7
-                  </span>
+                  <span className="text-xs text-muted-foreground font-normal">{i + 1}/7</span>
                 </CardTitle>
                 <Progress value={((i + 1) / 7) * 100} className="h-1" />
               </CardHeader>
@@ -185,7 +178,6 @@ const Assessments = () => {
           ))}
         </TabsContent>
 
-        {/* Questions Tab */}
         <TabsContent value="questions" className="space-y-3 mt-4">
           <Card>
             <CardHeader>
@@ -206,6 +198,9 @@ const Assessments = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Action Next */}
+      <ActionNextBox weakSkills={weakSkills} />
     </div>
   );
 };
