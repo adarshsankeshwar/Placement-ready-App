@@ -3,16 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getHistory, deleteEntry } from "@/lib/history";
+import { getHistory, deleteEntry, hadCorruptEntries } from "@/lib/history";
 import type { AnalysisEntry } from "@/lib/analysis";
 import { History, Trash2, ChevronRight, FileText } from "lucide-react";
 
 const Resources = () => {
   const navigate = useNavigate();
   const [entries, setEntries] = useState<AnalysisEntry[]>([]);
+  const [showCorrupt, setShowCorrupt] = useState(false);
 
   useEffect(() => {
     setEntries(getHistory());
+    setShowCorrupt(hadCorruptEntries());
   }, []);
 
   const handleDelete = (id: string) => {
@@ -36,6 +38,14 @@ const Resources = () => {
           All your past JD analyses, persisted locally.
         </p>
       </div>
+
+      {showCorrupt && (
+        <Card className="border-destructive/50 bg-destructive/5">
+          <CardContent className="p-4 text-sm text-destructive">
+            ⚠ One or more saved entries couldn't be loaded. Create a new analysis.
+          </CardContent>
+        </Card>
+      )}
 
       {entries.length === 0 ? (
         <Card>
@@ -79,7 +89,7 @@ const Resources = () => {
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <span className="text-lg font-bold text-primary">{entry.readinessScore}</span>
+                    <span className="text-lg font-bold text-primary">{entry.finalScore ?? entry.baseScore ?? entry.readinessScore}</span>
                     <span className="text-xs text-muted-foreground">/100</span>
                   </div>
                   <Button

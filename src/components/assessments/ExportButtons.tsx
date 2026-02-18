@@ -35,7 +35,7 @@ function formatAll(entry: AnalysisEntry): string {
     `=== PLACEMENT ANALYSIS ===`,
     `Company: ${entry.company || "N/A"}`,
     `Role: ${entry.role || "N/A"}`,
-    `Readiness Score: ${entry.readinessScore}/100`,
+    `Readiness Score: ${entry.finalScore ?? entry.baseScore}/100`,
     `Date: ${new Date(entry.createdAt).toLocaleDateString()}`,
     ``,
     `=== 7-DAY PLAN ===`,

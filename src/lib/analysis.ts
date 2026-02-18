@@ -22,6 +22,7 @@ export interface RoundMapping {
 export interface AnalysisEntry {
   id: string;
   createdAt: string;
+  updatedAt: string;
   company: string;
   role: string;
   jdText: string;
@@ -29,8 +30,11 @@ export interface AnalysisEntry {
   plan: DayPlan[];
   checklist: RoundChecklist[];
   questions: string[];
-  readinessScore: number;
-  skillConfidenceMap?: Record<string, "know" | "practice">;
+  baseScore: number;
+  finalScore: number;
+  /** @deprecated use baseScore/finalScore instead */
+  readinessScore?: number;
+  skillConfidenceMap: Record<string, "know" | "practice">;
   companyIntel?: CompanyIntel;
 }
 
@@ -94,7 +98,7 @@ export function extractSkills(jdText: string): SkillCategory[] {
   }
 
   if (result.length === 0) {
-    result.push({ name: "General", skills: ["General fresher stack"] });
+    result.push({ name: "Other", skills: ["Communication", "Problem solving", "Basic coding", "Projects"] });
   }
 
   return result;
@@ -509,23 +513,51 @@ export function generateCompanyIntel(
 
 export function runAnalysis(company: string, role: string, jdText: string): AnalysisEntry {
   const extractedSkills = extractSkills(jdText);
-  const readinessScore = calcReadinessScore(company, role, jdText, extractedSkills);
+  const baseScore = calcReadinessScore(company, role, jdText, extractedSkills);
   const checklist = generateChecklist(extractedSkills);
   const plan = generatePlan(extractedSkills);
   const questions = generateQuestions(extractedSkills);
   const companyIntel = generateCompanyIntel(company, jdText, extractedSkills);
+  const now = new Date().toISOString();
 
   return {
     id: crypto.randomUUID(),
-    createdAt: new Date().toISOString(),
-    company,
-    role,
+    createdAt: now,
+    updatedAt: now,
+    company: company || "",
+    role: role || "",
     jdText,
     extractedSkills,
     plan,
     checklist,
     questions,
-    readinessScore,
+    baseScore,
+    finalScore: baseScore,
+    skillConfidenceMap: {},
     companyIntel,
   };
+}
+
+/** Migrate legacy entries to the current schema */
+export function migrateEntry(raw: Record<string, unknown>): AnalysisEntry | null {
+  try {
+    if (!raw.id || !raw.jdText || !raw.createdAt) return null;
+    const entry = raw as unknown as AnalysisEntry & { readinessScore?: number };
+    // Migrate readinessScore → baseScore/finalScore
+    if (entry.baseScore === undefined && entry.readinessScore !== undefined) {
+      entry.baseScore = entry.readinessScore;
+      entry.finalScore = entry.readinessScore;
+    }
+    if (!entry.updatedAt) entry.updatedAt = entry.createdAt;
+    if (!entry.skillConfidenceMap) entry.skillConfidenceMap = {};
+    if (!entry.company) entry.company = "";
+    if (!entry.role) entry.role = "";
+    if (!Array.isArray(entry.extractedSkills)) return null;
+    if (!Array.isArray(entry.plan)) return null;
+    if (!Array.isArray(entry.checklist)) return null;
+    if (!Array.isArray(entry.questions)) return null;
+    return entry;
+  } catch {
+    return null;
+  }
 }

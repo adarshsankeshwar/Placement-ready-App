@@ -16,10 +16,11 @@ const Practice = () => {
   const [jdText, setJdText] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const isShortJd = jdText.trim().length > 0 && jdText.trim().length < 200;
+
   const handleAnalyze = () => {
     if (!jdText.trim()) return;
     setLoading(true);
-    // Simulate brief processing
     setTimeout(() => {
       const entry = runAnalysis(company.trim(), role.trim(), jdText.trim());
       saveEntry(entry);
@@ -81,6 +82,11 @@ const Practice = () => {
             <p className="text-xs text-muted-foreground">
               {jdText.length} characters {jdText.length > 800 && "✓ Detailed JD detected"}
             </p>
+            {isShortJd && (
+              <p className="text-xs text-destructive flex items-center gap-1">
+                ⚠ This JD is too short to analyze deeply. Paste full JD for better output.
+              </p>
+            )}
           </div>
           <Button
             size="lg"

@@ -35,7 +35,7 @@ const Assessments = () => {
     }
   }, [searchParams]);
 
-  const confidenceMap = useMemo(() => entry?.skillConfidenceMap || {}, [entry]);
+  const confidenceMap = useMemo(() => entry?.skillConfidenceMap ?? {}, [entry]);
 
   const allSkills = useMemo(() => {
     if (!entry) return [];
@@ -44,11 +44,11 @@ const Assessments = () => {
 
   const liveScore = useMemo(() => {
     if (!entry) return 0;
-    let score = entry.readinessScore;
+    let score = entry.baseScore ?? entry.readinessScore ?? 0;
     for (const skill of allSkills) {
       const status = confidenceMap[skill];
       if (status === "know") score += 2;
-      else score -= 2;
+      else if (status === "practice") score -= 2;
     }
     return Math.max(0, Math.min(100, score));
   }, [entry, confidenceMap, allSkills]);
@@ -63,14 +63,26 @@ const Assessments = () => {
       if (!entry) return;
       const current = confidenceMap[skill] || "practice";
       const next = current === "know" ? "practice" : "know";
+      const newMap: Record<string, "know" | "practice"> = { ...confidenceMap, [skill]: next };
+      const newFinalScore = (() => {
+        let score = entry.baseScore ?? entry.readinessScore ?? 0;
+        for (const s of allSkills) {
+          const st = newMap[s] || "practice";
+          if (st === "know") score += 2;
+          else if (st === "practice") score -= 2;
+        }
+        return Math.max(0, Math.min(100, score));
+      })();
       const updated: AnalysisEntry = {
         ...entry,
-        skillConfidenceMap: { ...confidenceMap, [skill]: next },
+        skillConfidenceMap: newMap,
+        finalScore: newFinalScore,
+        updatedAt: new Date().toISOString(),
       };
       setEntry(updated);
       updateEntry(updated);
     },
-    [entry, confidenceMap]
+    [entry, confidenceMap, allSkills]
   );
 
   if (!entry) {
