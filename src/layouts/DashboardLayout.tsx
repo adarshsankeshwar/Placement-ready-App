@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { LayoutDashboard, BookOpen, ClipboardList, FolderOpen, User } from "lucide-react";
+import { LayoutDashboard, BookOpen, ClipboardList, FolderOpen, User, ClipboardCheck, Rocket } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -19,6 +19,8 @@ const navItems = [
   { title: "Practice", url: "/dashboard/practice", icon: BookOpen },
   { title: "Assessments", url: "/dashboard/assessments", icon: ClipboardList },
   { title: "Resources", url: "/dashboard/resources", icon: FolderOpen },
+  { title: "Test Checklist", url: "/dashboard/test-checklist", icon: ClipboardCheck },
+  { title: "Ship", url: "/dashboard/ship", icon: Rocket },
   { title: "Profile", url: "/dashboard/profile", icon: User },
 ];
 
