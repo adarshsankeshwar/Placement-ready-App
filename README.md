@@ -1,73 +1,189 @@
-# Welcome to your Lovable project
+🎓 Placement Ready Application
 
-## Project info
+A web-based platform designed to help students prepare for campus placements by tracking progress, practicing aptitude and technical questions, managing resumes, and receiving job notifications.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+The goal of this application is to make students placement-ready through structured preparation and progress monitoring.
 
-## How can I edit this code?
+📌 Overview
 
-There are several ways of editing your application.
+The Placement Ready Application provides:
 
-**Use Lovable**
+Centralized placement preparation resources
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+Mock tests and practice questions
 
-Changes made via Lovable will be committed automatically to this repo.
+Resume building & tracking
 
-**Use your preferred IDE**
+Company eligibility tracking
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+Job & placement notifications
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Performance analytics dashboard
 
-Follow these steps:
+This system helps students systematically prepare for campus recruitment drives.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+🚀 Features
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+🔐 User Authentication (Student/Admin Login)
 
-# Step 3: Install the necessary dependencies.
-npm i
+📊 Student Dashboard
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+📝 Aptitude & Technical Mock Tests
 
-**Edit a file directly in GitHub**
+📚 Study Material Management
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+📄 Resume Builder & Upload
 
-**Use GitHub Codespaces**
+🏢 Company Eligibility Tracker
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+🔔 Placement Notifications
 
-## What technologies are used for this project?
+📈 Performance Analytics
 
-This project is built with:
+📅 Interview Scheduling
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+📱 Responsive Design
 
-## How can I deploy this project?
+🛠️ Tech Stack
+Frontend
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+React.js / HTML5 / CSS3 / JavaScript
 
-## Can I connect a custom domain to my Lovable project?
+Backend
 
-Yes, you can!
+Node.js & Express.js / Django / Spring Boot
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Database
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+MongoDB / MySQL / PostgreSQL
+
+Other Tools
+
+JWT Authentication
+
+Email Notifications
+
+REST APIs
+
+⚙️ Installation & Setup
+1️⃣ Clone the repository
+git clone https://github.com/yourusername/placement-ready-app.git
+cd placement-ready-app
+
+2️⃣ Install Dependencies
+Backend
+cd server
+npm install
+
+Frontend
+cd client
+npm install
+
+3️⃣ Configure Environment Variables
+
+Create a .env file inside the backend folder:
+
+PORT=5000
+DATABASE_URL=your_database_url
+JWT_SECRET=your_secret_key
+EMAIL_USER=your_email
+EMAIL_PASS=your_password
+
+4️⃣ Run the Application
+Start Backend
+npm run server
+
+Start Frontend
+npm start
+
+
+Application runs on:
+
+Frontend: http://localhost:3000
+Backend: http://localhost:5000
+
+👥 User Roles
+🎓 Student
+
+Take mock tests
+
+Upload resume
+
+Track placement eligibility
+
+View company notifications
+
+Monitor performance
+
+👨‍💼 Admin
+
+Add companies
+
+Upload study materials
+
+Manage tests
+
+Send notifications
+
+View student performance
+
+📊 Application Workflow
+
+Student registers/logs in
+
+Completes profile and uploads resume
+
+Takes mock tests
+
+Tracks performance and eligibility
+
+Applies for placement drives
+
+Receives notifications for interviews and results
+
+🔮 Future Enhancements
+
+AI-based resume feedback
+
+Interview preparation chatbot
+
+Coding challenge integration
+
+Video interview module
+
+Mobile app version
+
+Integration with platforms like LinkedIn or Naukri.com
+
+🧪 Testing
+
+Unit Testing (Jest / JUnit)
+
+API Testing (Postman)
+
+Integration Testing
+
+User Acceptance Testing
+
+📚 Learning Outcomes
+
+Full-stack application development
+
+Authentication & Authorization
+
+RESTful API development
+
+Database management
+
+Role-based access control
+
+Real-world project architecture
+
+⚠️ Disclaimer
+
+This project is developed for educational purposes to assist students in placement preparation. It is not officially affiliated with any recruitment company or job portal.
+
+👨‍💻 Author
+
+Your Name
+GitHub: https://github.com/yourusername
