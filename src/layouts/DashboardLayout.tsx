@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { LayoutDashboard, BookOpen, ClipboardList, FolderOpen, User, ClipboardCheck, Rocket } from "lucide-react";
+import { LayoutDashboard, BookOpen, ClipboardList, FolderOpen, User, ClipboardCheck, Rocket, FileCheck } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -21,6 +21,7 @@ const navItems = [
   { title: "Resources", url: "/dashboard/resources", icon: FolderOpen },
   { title: "Test Checklist", url: "/dashboard/test-checklist", icon: ClipboardCheck },
   { title: "Ship", url: "/dashboard/ship", icon: Rocket },
+  { title: "Proof", url: "/dashboard/proof", icon: FileCheck },
   { title: "Profile", url: "/dashboard/profile", icon: User },
 ];
 

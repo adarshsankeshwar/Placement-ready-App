@@ -13,6 +13,7 @@ import Resources from "./pages/dashboard/Resources";
 import Profile from "./pages/dashboard/Profile";
 import TestChecklist from "./pages/dashboard/TestChecklist";
 import Ship from "./pages/dashboard/Ship";
+import Proof from "./pages/dashboard/Proof";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="profile" element={<Profile />} />
             <Route path="test-checklist" element={<TestChecklist />} />
             <Route path="ship" element={<Ship />} />
+            <Route path="proof" element={<Proof />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
