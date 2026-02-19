@@ -67,7 +67,7 @@ REST APIs
 
 ⚙️ Installation & Setup
 1️⃣ Clone the repository
-git clone https://github.com/yourusername/placement-ready-app.git
+git clone https://github.com/adarshsankeshwar/placement-ready-app.git
 cd placement-ready-app
 
 2️⃣ Install Dependencies
@@ -186,4 +186,4 @@ This project is developed for educational purposes to assist students in placeme
 👨‍💻 Author
 
 Your Name
-GitHub: https://github.com/yourusername
+GitHub: https://github.com/adarshsankeshwar
